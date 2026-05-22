@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-healthy
+  namespace: sample-app
+  labels:
+    app: nginx-healthy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-healthy
+  template:
+    metadata:
+      labels:
+        app: nginx-healthy
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.27
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
