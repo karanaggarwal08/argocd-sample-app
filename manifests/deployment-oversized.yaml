@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bloated-app
+  namespace: sample-app
+  labels:
+    app: bloated-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bloated-app
+  template:
+    metadata:
+      labels:
+        app: bloated-app
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 2000m
+              memory: 1024Mi
+            limits:
+              cpu: 4000m
+              memory: 2048Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memory-hog
+  namespace: sample-app
+  labels:
+    app: memory-hog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: memory-hog
+  template:
+    metadata:
+      labels:
+        app: memory-hog
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.27
+          ports:
+            - containerPort: 9000
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1536Mi

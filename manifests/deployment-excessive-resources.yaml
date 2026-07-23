@@ -1,0 +1,139 @@
+---
+# Over-provisioned CPU deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpu-hog
+  namespace: sample-app
+  labels:
+    app: cpu-hog
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cpu-hog
+  template:
+    metadata:
+      labels:
+        app: cpu-hog
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "3000m"
+              memory: "256Mi"
+            limits:
+              cpu: "5000m"
+              memory: "512Mi"
+---
+# Over-provisioned memory deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memory-waste
+  namespace: sample-app
+  labels:
+    app: memory-waste
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: memory-waste
+  template:
+    metadata:
+      labels:
+        app: memory-waste
+    spec:
+      containers:
+        - name: app
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "2048Mi"
+            limits:
+              cpu: "1000m"
+              memory: "4096Mi"
+---
+# Balanced over-provisioned deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resource-waster
+  namespace: sample-app
+  labels:
+    app: resource-waster
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: resource-waster
+  template:
+    metadata:
+      labels:
+        app: resource-waster
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "2000m"
+              memory: "1500Mi"
+            limits:
+              cpu: "4000m"
+              memory: "3000Mi"
+---
+# StatefulSet with excess resources
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database-excessive
+  namespace: sample-app
+  labels:
+    app: database-excessive
+spec:
+  serviceName: database-excessive
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database-excessive
+  template:
+    metadata:
+      labels:
+        app: database-excessive
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          resources:
+            requests:
+              cpu: "2000m"
+              memory: "2048Mi"
+            limits:
+              cpu: "4000m"
+              memory: "4096Mi"
+---
+# Service for StatefulSet
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-excessive
+  namespace: sample-app
+spec:
+  clusterIP: None
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: database-excessive
